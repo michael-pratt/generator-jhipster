@@ -19,7 +19,10 @@
 package <%=packageName%>.config;
 <%_ if (databaseType === 'mongodb') { _%>
 
-import com.github.mongobee.Mongobee;
+import com.github.cloudyrock.mongock.Mongock;
+import com.github.cloudyrock.mongock.SpringBootMongock;
+import com.github.cloudyrock.mongock.SpringBootMongockBuilder;
+import com.github.cloudyrock.mongock.SpringMongockBuilder;
 
 import io.github.jhipster.config.JHipsterConstants;
 import io.github.jhipster.domain.util.JSR310DateConverters.*;
@@ -113,8 +116,8 @@ public class CloudDatabaseConfiguration extends AbstractCloudConfig {
     }
 
     @Bean
-    public Mongobee mongobee(MongoDbFactory mongoDbFactory, MongoTemplate mongoTemplate, Cloud cloud) {
-        log.debug("Configuring Cloud Mongobee");
+    public Mongock mongock(ApplicationContext applicationContext, MongoClient mongoClient, MongoProperties mongoProperties) {
+        log.debug("Configuring Cloud Mongock");
         List<ServiceInfo> matchingServiceInfos = cloud.getServiceInfos(MongoDbFactory.class);
 
         if (matchingServiceInfos.size() != 1) {
@@ -122,13 +125,12 @@ public class CloudDatabaseConfiguration extends AbstractCloudConfig {
                 + matchingServiceInfos.size());
         }
         MongoServiceInfo info = (MongoServiceInfo) matchingServiceInfos.get(0);
-        Mongobee mongobee = new Mongobee(info.getUri());
-        mongobee.setDbName(mongoDbFactory.getDb().getName());
-        mongobee.setMongoTemplate(mongoTemplate);
-        // package to scan for migrations
-        mongobee.setChangeLogsScanPackage("<%=packageName%>.config.dbmigrations");
-        mongobee.setEnabled(true);
-        return mongobee;
+        return new SpringBootMongockBuilder(mongoClient, mongoProperties.getMongoClientDatabase(), "<%=packageName%>.config.dbmigrations")
+            .setApplicationContext(applicationContext)
+            .setLockQuickConfig()
+            .setEnabled(true)
+            .setChangeLogCollectionName("mongockLock")
+            .build();
     }
     <%_ } _%>
 }
