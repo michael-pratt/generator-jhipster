@@ -411,7 +411,7 @@ dependencies {
     compile "org.springframework.security:spring-security-jwt"
     <%_ } _%>
     <%_ if (databaseType === 'mongodb') { _%>
-    compile "com.github.mongobee:mongobee"
+    compile "com.github.cloudyrock.mongock:mongock-spring"
     <%_ } _%>
     <%_ if (databaseType === 'couchbase') { _%>
     compile "com.github.differentway:couchmove"
